@@ -115,11 +115,12 @@ func WriteCode(session *Session, code int, message string) {
 	session.Connection.Writer.PrintfLine("%d %s", code, message)
 }
 
+/* Helper to generate a "unique" Message ID for the client to use.
+ *
+ * It's not super vital, since we don't support AUTH yet. */
 func generateMsgId(server *Server) string {
 	return strconv.FormatInt(time.Now().UnixNano(), 10) +
-		"." +
-		"0000" +
-		"@" +
+		".0@" +
 		server.Name
 }
 
