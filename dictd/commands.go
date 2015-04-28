@@ -77,7 +77,6 @@ func showCommandHandler(session *Session, command Command) {
 			"110 %d database(s) present",
 			len(session.DictServer.databases),
 		)
-
 		for db := range session.DictServer.databases {
 			databaseBackend := session.DictServer.GetDatabase(db)
 			session.Connection.Writer.PrintfLine(
@@ -86,7 +85,6 @@ func showCommandHandler(session *Session, command Command) {
 				databaseBackend.Description(),
 			)
 		}
-
 		session.Connection.Writer.PrintfLine(".")
 		WriteCode(session, 250, "ok")
 		return
@@ -97,6 +95,16 @@ func showCommandHandler(session *Session, command Command) {
 			syntaxErrorHandler(session, command)
 			return
 		}
+		name := command.Params[1]
+		session.Connection.Writer.PrintfLine("112 information for %s", name)
+		databaseBackend := session.DictServer.GetDatabase(name)
+
+		if databaseBackend == nil {
+			WriteCode(session, 550, "invalid database")
+			return
+		}
+		WriteTextBlock(session, databaseBackend.Info())
+		WriteCode(session, 250, "ok")
 		return
 	case "SERVER":
 		return
