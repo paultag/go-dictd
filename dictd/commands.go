@@ -85,7 +85,7 @@ func showCommandHandler(session *Session, command Command) {
 			session.Connection.Writer.PrintfLine(
 				"%s \"%s\"",
 				db,
-				databaseBackend.Description(),
+				databaseBackend.Description(db),
 			)
 		}
 		session.Connection.Writer.PrintfLine(".")
@@ -110,7 +110,7 @@ prefix "Prefix"`)
 			WriteCode(session, 550, "invalid database")
 			return
 		}
-		WriteTextBlock(session, databaseBackend.Info())
+		WriteTextBlock(session, databaseBackend.Info(name))
 		WriteCode(session, 250, "ok")
 		return
 	case "SERVER":
@@ -167,15 +167,16 @@ func quitCommandHandler(session *Session, command Command) {
  */
 func writeDefinition(
 	session *Session,
-	databaseBackend Database,
 	definition *Definition,
-	database string,
 ) {
+	databaseBackend := definition.DictDatabase
+	db := definition.DictDatabaseName
+
 	session.Connection.Writer.PrintfLine(
 		"151 \"%s\" %s \"%s\"",
 		definition.Word,
-		database,
-		databaseBackend.Description(),
+		db,
+		databaseBackend.Description(db),
 	)
 	WriteTextBlock(session, definition.Definition)
 }
@@ -192,24 +193,21 @@ func defineCommandHandler(session *Session, command Command) {
 	database := command.Params[0]
 	word := command.Params[1]
 
-	/*
-	 * Dispatch on ! or * for those behaviors
-	 */
+	defs, err := session.DictServer.Define(database, word)
 
-	databaseBackend := session.DictServer.GetDatabase(database)
-	if databaseBackend == nil {
+	if err != nil {
 		WriteCode(session, 550, "invalid database")
 		return
 	}
 
-	words := databaseBackend.Define(word)
-	session.Connection.Writer.PrintfLine(
-		"150 %d definitions retrieved",
-		len(words),
-	)
+	if len(defs) == 0 {
+		WriteCode(session, 552, "no match")
+		return
+	}
 
-	for _, el := range words {
-		writeDefinition(session, databaseBackend, el, database)
+	session.Connection.Writer.PrintfLine("150 %d definitions", len(defs))
+	for _, el := range defs {
+		writeDefinition(session, el)
 	}
 	WriteCode(session, 250, "ok")
 }

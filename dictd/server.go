@@ -26,6 +26,10 @@ package dictd
  * In particular, this file contains a few interfaces and commonly used
  * structs for message passing, as well as generic routing code. */
 
+import (
+	"errors"
+)
+
 /* Command is the encapsulation for a user's request of the Server. */
 type Command struct {
 	Command string
@@ -34,24 +38,26 @@ type Command struct {
 
 /* Definition is the encapsulation of a response for a given Entry. */
 type Definition struct {
-	Word       string
-	Definition string
+	Word             string
+	Definition       string
+	DictDatabase     Database
+	DictDatabaseName string
 }
 
 /* Database is an interface for external Database "Backends" to implement. */
 type Database interface {
 
 	/* Method to handle incoming `MATCH` commands. */
-	Match(query string, strat string) []*Definition
+	Match(name string, query string, strat string) []*Definition
 
 	/* Method to handle incoming `DEFINE` commands. */
-	Define(query string) []*Definition
+	Define(name string, query string) []*Definition
 
 	/* Method to handle incoming `SHOW INFO` commands. */
-	Info() string
+	Info(name string) string
 
 	/* Method to return a one-line Description of the Database. */
-	Description() string
+	Description(name string) string
 }
 
 /* Server encapsulation.
@@ -63,6 +69,17 @@ type Server struct {
 	Info      string
 	databases map[string]Database
 	commands  map[string]func(*Session, Command)
+}
+
+func (this *Server) Define(
+	database string,
+	query string,
+) ([]*Definition, error) {
+	db := this.GetDatabase(database)
+	if db == nil {
+		return nil, errors.New("No such database")
+	}
+	return db.Define(database, query), nil
 }
 
 /* Register dict.Database `database` under `name`. */
