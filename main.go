@@ -10,7 +10,7 @@ import (
 
 func main() {
 	server := dictd.NewServer("pault.ag")
-	levelDB, err := database.NewLevelDBDatabase("/home/tag/jargon.leveldb", "jargon file")
+	levelDB, err := database.NewLevelDBDatabase("/home/tag/jargon.ldb", "jargon file")
 
 	if err != nil {
 		log.Fatal(err)
