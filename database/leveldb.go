@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/paultag/go-dictd/dictd"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 /*
@@ -36,10 +37,24 @@ type LevelDBDatabase struct {
  *
  */
 func (this *LevelDBDatabase) Match(name string, query string, strat string) []*dictd.Definition {
-	/* Implement at least prefix scanning by snagging a chunk of the levelDB
-	 * database at that slice, and return all results. I don't know how we
-	 * can do exact, perhaps just call Define? */
-	return make([]*dictd.Definition, 0)
+	iter := this.db.NewIterator(util.BytesPrefix([]byte(query)), nil)
+	els := make([]*dictd.Definition, 0)
+
+	for iter.Next() {
+		word := string(iter.Key())
+		define := string(iter.Value())
+
+		def := &dictd.Definition{
+			DictDatabase:     this,
+			DictDatabaseName: name,
+			Word:             word,
+			Definition:       define,
+		}
+		els = append(els, def)
+	}
+	iter.Release()
+
+	return els
 }
 
 /*
