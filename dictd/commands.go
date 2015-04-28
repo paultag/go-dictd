@@ -155,6 +155,13 @@ func syntaxErrorHandler(session *Session, command Command) {
 
 /*
  */
+func quitCommandHandler(session *Session, command Command) {
+	WriteCode(session, 221, "bye")
+	session.Connection.Close()
+}
+
+/*
+ */
 func writeDefinition(
 	session *Session,
 	databaseBackend Database,
@@ -212,4 +219,5 @@ func registerDefaultHandlers(server *Server) {
 	server.RegisterHandler("DEFINE", defineCommandHandler)
 	server.RegisterHandler("OPTION", optionCommandHandler)
 	server.RegisterHandler("SHOW", showCommandHandler)
+	server.RegisterHandler("QUIT", quitCommandHandler)
 }
