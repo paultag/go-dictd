@@ -21,11 +21,6 @@
 
 package dictd
 
-import (
-	"strconv"
-	"time"
-)
-
 /* socket.go - transport-aware interface for the dict protocol.
  *
  * In particular, this file contains a net/textproto based interface
@@ -37,7 +32,9 @@ import (
 	"log"
 	"net"
 	"net/textproto"
+	"strconv"
 	"strings"
+	"time"
 )
 
 /* Session contains state data that lasts throughout the connection. */
