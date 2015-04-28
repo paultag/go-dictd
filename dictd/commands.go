@@ -92,7 +92,10 @@ func showCommandHandler(session *Session, command Command) {
 		WriteCode(session, 250, "ok")
 		return
 	case "STRAT", "STRATEGIES":
-		unknownCommandHandler(session, command)
+		session.Connection.Writer.PrintfLine("111 2 present")
+		WriteTextBlock(session, `exact "Match"
+prefix "Prefix"`)
+		session.Connection.Writer.PrintfLine("250 ok")
 		return
 	case "INFO":
 		if len(command.Params) < 2 {
