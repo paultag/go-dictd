@@ -183,6 +183,43 @@ func writeDefinition(
 
 /*
  */
+func matchCommandHandler(session *Session, command Command) {
+
+	if len(command.Params) <= 2 {
+		syntaxErrorHandler(session, command)
+		return
+	}
+
+	database := command.Params[0]
+	strat := command.Params[1]
+	word := command.Params[2]
+
+	defs, err := session.DictServer.Match(database, word, strat)
+
+	if err != nil {
+		WriteCode(session, 550, "invalid database")
+		return
+	}
+
+	if len(defs) == 0 {
+		WriteCode(session, 552, "no match")
+		return
+	}
+
+	session.Connection.Writer.PrintfLine("150 %d matches found", len(defs))
+	for _, el := range defs {
+		session.Connection.Writer.PrintfLine(
+			"%s \"%s\"",
+			el.DictDatabaseName,
+			el.Word,
+		)
+	}
+	session.Connection.Writer.PrintfLine(".")
+	WriteCode(session, 250, "ok")
+}
+
+/*
+ */
 func defineCommandHandler(session *Session, command Command) {
 
 	if len(command.Params) <= 1 {
@@ -219,6 +256,7 @@ func registerDefaultHandlers(server *Server) {
 	server.RegisterHandler("CLIENT", clientCommandHandler)
 	server.RegisterHandler("DEFINE", defineCommandHandler)
 	server.RegisterHandler("OPTION", optionCommandHandler)
+	server.RegisterHandler("MATCH", matchCommandHandler)
 	server.RegisterHandler("SHOW", showCommandHandler)
 	server.RegisterHandler("QUIT", quitCommandHandler)
 }

@@ -72,6 +72,50 @@ type Server struct {
 }
 
 /* Define a word against the server, according to fun rules! */
+func (this *Server) Match(
+	database string,
+	query string,
+	strat string,
+) ([]*Definition, error) {
+	/* Right, so we've been asked to figure out what a word is.
+	 * The RFC has special handling based on the database name,
+	 * so we're going to go ahead and figure out what we should
+	 * be doing here. */
+
+	switch database {
+	case "!":
+		/* The RFC states that we search all Databases for entries, and
+		 * if we hit, we should return all Definitions for the given word
+		 * for that Database. */
+		for database, databaseBackend := range this.databases {
+			defs := databaseBackend.Match(database, query, strat)
+			if defs != nil && len(defs) != 0 {
+				return defs, nil
+			}
+		}
+		return make([]*Definition, 0), nil
+
+	case "*":
+		/* The RFC states that we search all Databases for entries, and
+		 * return *all* Definitions for the given word for all Databases. */
+		var allDefs = make([]*Definition, 0)
+		for database, databaseBackend := range this.databases {
+			defs := databaseBackend.Match(database, query, strat)
+			allDefs = append(allDefs, defs...)
+		}
+		return allDefs, nil
+	}
+
+	/* Otherwise, let's go with the boring usual behavior -- try to get
+	 * the database, and return defs for that one DB. */
+	db := this.GetDatabase(database)
+	if db == nil {
+		return nil, errors.New("No such database")
+	}
+	return db.Match(database, query, strat), nil
+}
+
+/* Define a word against the server, according to fun rules! */
 func (this *Server) Define(
 	database string,
 	query string,
