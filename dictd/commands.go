@@ -30,15 +30,14 @@ package dictd
  *
  */
 func unknownCommandHandler(session *Session, command Command) {
-	session.Connection.Writer.PrintfLine("%d %s", 500, "unknown command")
+	session.Connection.Writer.PrintfLine("500 %s", "unknown command")
 }
 
 /*
  *
  */
 func handshakeHandler(session *Session) {
-	session.Connection.Writer.PrintfLine("%d %s <%s> <%s>",
-		220,
+	session.Connection.Writer.PrintfLine("220 %s <%s> <%s>",
 		"pault.ag dictd proto",
 		"mime",
 		session.MsgId,
@@ -49,7 +48,7 @@ func handshakeHandler(session *Session) {
  */
 func clientCommandHandler(session *Session, command Command) {
 	// session.Client
-	session.Connection.Writer.PrintfLine("%d %s", 250, "ok")
+	session.Connection.Writer.PrintfLine("250 %s", "ok")
 
 }
 
@@ -59,8 +58,7 @@ func defineCommandHandler(session *Session, command Command) {
 
 	if len(command.Params) <= 1 {
 		session.Connection.Writer.PrintfLine(
-			"%d syntax error, illegal parameters",
-			501,
+			"501 syntax error, illegal parameters",
 		)
 		return
 	}
@@ -74,7 +72,7 @@ func defineCommandHandler(session *Session, command Command) {
 
 	databaseBackend := session.DictServer.GetDatabase(database)
 	if databaseBackend == nil {
-		session.Connection.Writer.PrintfLine("%d invalid database", 550)
+		session.Connection.Writer.PrintfLine("550 invalid database")
 		return
 	}
 
