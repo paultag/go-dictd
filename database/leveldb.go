@@ -79,13 +79,6 @@ func (this *LevelDBDatabase) Define(name string, query string) []*dictd.Definiti
 /*
  *
  */
-func (this *LevelDBDatabase) storeDefinition(word string, def string) error {
-	return this.db.Put([]byte(word), []byte(def), nil)
-}
-
-/*
- *
- */
 func (this *LevelDBDatabase) Info(name string) string {
 	return "Foo"
 }
