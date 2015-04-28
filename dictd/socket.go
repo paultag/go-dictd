@@ -21,6 +21,11 @@
 
 package dictd
 
+import (
+	"strconv"
+	"time"
+)
+
 /* socket.go - transport-aware interface for the dict protocol.
  *
  * In particular, this file contains a net/textproto based interface
@@ -102,12 +107,21 @@ func WriteCode(session *Session, code int, message string) {
 	session.Connection.Writer.PrintfLine("%d %s", code, message)
 }
 
+func generateMsgId(server *Server) string {
+	return strconv.FormatInt(time.Now().UnixNano(), 10) +
+		"." +
+		"0000" +
+		"@" +
+		server.Name
+}
+
 /* Given a `dict.Server` and a `net.Conn`, do a bringup, and run the
  * `ReadLine` loop, dispatching commands to the correct internals. */
 func Handle(server *Server, conn net.Conn) {
 	proto := textproto.NewConn(conn)
+
 	session := Session{
-		MsgId:      "testing@pault.ag",
+		MsgId:      generateMsgId(server),
 		Client:     "",
 		Connection: proto,
 		DictServer: server,
