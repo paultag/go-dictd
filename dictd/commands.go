@@ -51,6 +51,9 @@ func handshakeHandler(session *Session) {
 /*
  */
 func clientCommandHandler(session *Session, command Command) {
+	/* Ignore everything for now, in the future, we should be
+	 * setting the value of the message over into session.Client or
+	 * something. */
 	WriteCode(session, 250, "ok")
 }
 
