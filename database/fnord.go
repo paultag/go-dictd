@@ -4,9 +4,7 @@ import (
 	"github.com/paultag/go-dictd/dictd"
 )
 
-type FnordDatabase struct {
-	dictd.Database
-}
+type FnordDatabase struct{ dictd.Database }
 
 func (this *FnordDatabase) Match(query string, strat string) []*dictd.Definition {
 	els := make([]*dictd.Definition, 1)
