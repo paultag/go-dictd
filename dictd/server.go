@@ -76,6 +76,25 @@ func (this *Server) Define(
 	database string,
 	query string,
 ) ([]*Definition, error) {
+
+	switch database {
+	case "!":
+		for database, databaseBackend := range this.databases {
+			defs := databaseBackend.Define(database, query)
+			if defs != nil && len(defs) != 0 {
+				return defs, nil
+			}
+		}
+		return make([]*Definition, 0), nil
+	case "*":
+		var allDefs = make([]*Definition, 0)
+		for database, databaseBackend := range this.databases {
+			defs := databaseBackend.Define(database, query)
+			allDefs = append(allDefs, defs...)
+		}
+		return allDefs, nil
+	}
+
 	db := this.GetDatabase(database)
 	if db == nil {
 		return nil, errors.New("No such database")
