@@ -34,7 +34,7 @@ import (
  *
  */
 func unknownCommandHandler(session *Session, command Command) {
-	session.Connection.Writer.PrintfLine("500 %s", "unknown command")
+	WriteCode(session, 500, "unknown command")
 }
 
 /*
@@ -51,7 +51,7 @@ func handshakeHandler(session *Session) {
 /*
  */
 func clientCommandHandler(session *Session, command Command) {
-	session.Connection.Writer.PrintfLine("250 %s", "ok")
+	WriteCode(session, 250, "ok")
 }
 
 /*
@@ -70,22 +70,20 @@ func optionCommandHandler(session *Session, command Command) {
 	case "MIME":
 		session.Options["MIME"] = !session.Options["MIME"]
 		if session.Options["MIME"] {
-			session.Connection.Writer.PrintfLine("250 ok - mime I guess")
+			WriteCode(session, 250, "ok - mime I guess")
 		} else {
-			session.Connection.Writer.PrintfLine("250 ok - no mime I guess")
+			WriteCode(session, 250, "ok - no mime I guess")
 		}
 		return
 	}
 
-	session.Connection.Writer.PrintfLine("500 %s", "unknown command")
+	WriteCode(session, 500, "unknown command")
 }
 
 /*
  */
 func syntaxErrorHandler(session *Session, command Command) {
-	session.Connection.Writer.PrintfLine(
-		"501 syntax error, illegal parameters",
-	)
+	WriteCode(session, 501, "syntax error, illegal parameters")
 }
 
 /*
@@ -106,7 +104,7 @@ func defineCommandHandler(session *Session, command Command) {
 
 	databaseBackend := session.DictServer.GetDatabase(database)
 	if databaseBackend == nil {
-		session.Connection.Writer.PrintfLine("550 invalid database")
+		WriteCode(session, 550, "invalid database")
 		return
 	}
 
@@ -123,11 +121,9 @@ func defineCommandHandler(session *Session, command Command) {
 			database,
 			databaseBackend.Description(),
 		)
-		writer := session.Connection.Writer.DotWriter()
-		writer.Write([]byte(el.Definition))
-		writer.Close()
+		WriteTextBlock(session, el.Definition)
 	}
-	session.Connection.Writer.PrintfLine("250 ok")
+	WriteCode(session, 250, "ok")
 }
 
 /*

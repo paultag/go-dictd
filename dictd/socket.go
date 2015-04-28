@@ -90,6 +90,18 @@ func handleCommand(session *Session, command *Command) {
 	}
 }
 
+/* Helper for commands to write out a text block */
+func WriteTextBlock(session *Session, stream string) {
+	writer := session.Connection.Writer.DotWriter()
+	writer.Write([]byte(stream))
+	writer.Close()
+}
+
+/* Helper for commands to write out a code line */
+func WriteCode(session *Session, code int, message string) {
+	session.Connection.Writer.PrintfLine("%d %s", code, message)
+}
+
 /* Given a `dict.Server` and a `net.Conn`, do a bringup, and run the
  * `ReadLine` loop, dispatching commands to the correct internals. */
 func Handle(server *Server, conn net.Conn) {
