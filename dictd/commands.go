@@ -42,7 +42,7 @@ func unknownCommandHandler(session *Session, command Command) {
  */
 func handshakeHandler(session *Session) {
 	session.Connection.Writer.PrintfLine("220 %s <%s> <%s>",
-		"pault.ag dictd proto",
+		"go-dictd",
 		"mime",
 		session.MsgId,
 	)

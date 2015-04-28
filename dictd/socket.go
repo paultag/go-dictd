@@ -97,6 +97,14 @@ func handleCommand(session *Session, command *Command) {
 
 /* Helper for commands to write out a text block */
 func WriteTextBlock(session *Session, stream string) {
+	if session.Options["MIME"] {
+		session.Connection.Writer.PrintfLine(
+			"Content-type: text/plain; charset=utf-8\n" +
+				"Content-transfer-encoding: 8bit\n",
+		)
+
+	}
+
 	writer := session.Connection.Writer.DotWriter()
 	writer.Write([]byte(stream))
 	writer.Close()
