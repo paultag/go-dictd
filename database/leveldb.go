@@ -19,8 +19,6 @@ func NewLevelDBDatabase(path string, description string) (dictd.Database, error)
 		db:          db,
 	}
 
-	databaseBackend.storeDefinition("foo", "foo is a word that means something")
-
 	return &databaseBackend, nil
 }
 
