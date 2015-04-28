@@ -36,6 +36,9 @@ type LevelDBDatabase struct {
  *
  */
 func (this *LevelDBDatabase) Match(name string, query string, strat string) []*dictd.Definition {
+	/* Implement at least prefix scanning by snagging a chunk of the levelDB
+	 * database at that slice, and return all results. I don't know how we
+	 * can do exact, perhaps just call Define? */
 	return make([]*dictd.Definition, 0)
 }
 
