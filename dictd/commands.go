@@ -77,7 +77,7 @@ func optionCommandHandler(session *Session, command Command) {
 		return
 	}
 
-	WriteCode(session, 500, "unknown command")
+	unknownCommandHandler(session, command)
 }
 
 /*
