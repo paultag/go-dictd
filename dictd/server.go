@@ -60,6 +60,7 @@ type Database interface {
  * to handle registered Databases and Commands. */
 type Server struct {
 	Name      string
+	Info      string
 	databases map[string]Database
 	commands  map[string]func(*Session, Command)
 }
@@ -99,6 +100,7 @@ func (this *Server) GetHandler(command *Command) func(*Session, Command) {
 func NewServer(name string) Server {
 	server := Server{
 		Name:      name,
+		Info:      "",
 		commands:  map[string]func(*Session, Command){},
 		databases: map[string]Database{},
 	}

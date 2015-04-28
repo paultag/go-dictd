@@ -107,6 +107,9 @@ func showCommandHandler(session *Session, command Command) {
 		WriteCode(session, 250, "ok")
 		return
 	case "SERVER":
+		WriteCode(session, 114, "server information")
+		WriteTextBlock(session, session.DictServer.Info)
+		WriteCode(session, 250, "ok")
 		return
 	}
 
