@@ -71,6 +71,7 @@ type Server struct {
 	commands  map[string]func(*Session, Command)
 }
 
+/* Define a word against the server, according to fun rules! */
 func (this *Server) Define(
 	database string,
 	query string,
