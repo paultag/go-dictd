@@ -89,6 +89,7 @@ func showCommandHandler(session *Session, command Command) {
 		WriteCode(session, 250, "ok")
 		return
 	case "STRAT", "STRATEGIES":
+		unknownCommandHandler(session, command)
 		return
 	case "INFO":
 		if len(command.Params) < 2 {
