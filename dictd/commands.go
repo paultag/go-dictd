@@ -26,6 +26,10 @@ package dictd
  * This contains the core protocol implementaion, including syntax error
  * handlers, the initial handshake, and the core MUST-haves */
 
+import (
+	"strings"
+)
+
 /*
  *
  */
@@ -47,9 +51,41 @@ func handshakeHandler(session *Session) {
 /*
  */
 func clientCommandHandler(session *Session, command Command) {
-	// session.Client
 	session.Connection.Writer.PrintfLine("250 %s", "ok")
+}
 
+/*
+ *
+ */
+func optionCommandHandler(session *Session, command Command) {
+
+	if len(command.Params) < 1 {
+		syntaxErrorHandler(session, command)
+		return
+	}
+
+	param := strings.ToUpper(command.Params[0])
+
+	switch param {
+	case "MIME":
+		session.Options["MIME"] = !session.Options["MIME"]
+		if session.Options["MIME"] {
+			session.Connection.Writer.PrintfLine("250 ok - mime I guess")
+		} else {
+			session.Connection.Writer.PrintfLine("250 ok - no mime I guess")
+		}
+		return
+	}
+
+	session.Connection.Writer.PrintfLine("500 %s", "unknown command")
+}
+
+/*
+ */
+func syntaxErrorHandler(session *Session, command Command) {
+	session.Connection.Writer.PrintfLine(
+		"501 syntax error, illegal parameters",
+	)
 }
 
 /*
@@ -57,9 +93,7 @@ func clientCommandHandler(session *Session, command Command) {
 func defineCommandHandler(session *Session, command Command) {
 
 	if len(command.Params) <= 1 {
-		session.Connection.Writer.PrintfLine(
-			"501 syntax error, illegal parameters",
-		)
+		syntaxErrorHandler(session, command)
 		return
 	}
 
@@ -102,4 +136,5 @@ func defineCommandHandler(session *Session, command Command) {
 func registerDefaultHandlers(server *Server) {
 	server.RegisterHandler("CLIENT", clientCommandHandler)
 	server.RegisterHandler("DEFINE", defineCommandHandler)
+	server.RegisterHandler("OPTION", optionCommandHandler)
 }

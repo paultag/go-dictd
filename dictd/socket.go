@@ -41,6 +41,7 @@ type Session struct {
 	Client     string
 	Connection *textproto.Conn
 	DictServer *Server
+	Options    map[string]bool
 }
 
 /* Take an incoming line `line`, and split it according to the command
@@ -98,7 +99,10 @@ func Handle(server *Server, conn net.Conn) {
 		Client:     "",
 		Connection: proto,
 		DictServer: server,
+		Options:    map[string]bool{},
 	}
+
+	session.Options["MIME"] = false /* Requiredish */
 
 	/* Right, so we've got a connection, let's send the 220 and let the
 	 * client know we're happy. */
