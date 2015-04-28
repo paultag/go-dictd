@@ -10,10 +10,7 @@ type FnordDatabase struct {
 
 func (this *FnordDatabase) Match(query string, strat string) []*dictd.Definition {
 	els := make([]*dictd.Definition, 1)
-	els[0] = &dictd.Definition{
-		Word:       query,
-		Definition: query,
-	}
+	els[0] = &dictd.Definition{Word: query}
 	return els
 }
 
