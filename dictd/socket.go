@@ -46,24 +46,61 @@ type Session struct {
 	Options    map[string]bool
 }
 
-/* Take an incoming line `line`, and split it according to the command
- * line spec in the RFC. */
-func tokenizeLine(line string) ([]string, error) {
-	var tokens []string
-	chunks := strings.Split(line, " ")
-
-	for _, v := range chunks {
-		el := strings.Trim(v, " \t\n\r")
-		if el != "" {
-			tokens = append(tokens, el)
+func consumeAtom(buf string) (token string, buffer string, err error) {
+	for i, el := range buf {
+		switch el {
+		case ' ':
+			return buf[:i], cleanup(buf[i:]), nil
 		}
 	}
+	return buf, "", nil
+}
 
-	if len(tokens) == 0 {
-		return nil, errors.New("Busted command")
+func consumeString(quote string, buf string) (token string, buffer string, err error) {
+	var escape = false
+
+	for i, el := range buf {
+		switch el {
+		case rune(quote[0]):
+			if !escape {
+				token := strings.Replace(buf[:i], "\\", "", -1)
+				return token, cleanup(buf[i+1:]), nil
+			}
+		case '\\':
+			escape = true
+			continue
+		case '\'', '"':
+			if !escape {
+				return "", "", errors.New("bad char")
+			}
+		}
+		escape = false
 	}
+	return buf, "", nil
+}
 
-	return tokens, nil
+func cleanup(el string) string {
+	return strings.Trim(el, " \t\r\n")
+}
+
+/* Take an incoming line `line`, and split it according to the command
+ * line spec in the RFC. */
+func tokenizeLine(line string) (tokens []string, err error) {
+	var token string
+	for line != "" {
+		if line[0] == '"' {
+			token, line, err = consumeString("\"", line[1:])
+		} else {
+			token, line, err = consumeAtom(line)
+		}
+
+		if err != nil {
+			return []string{}, err
+		}
+
+		tokens = append(tokens, token)
+	}
+	return
 }
 
 /* Parse an incoming line, and return a `dict.Command` suitable for
