@@ -55,6 +55,58 @@ func clientCommandHandler(session *Session, command Command) {
 }
 
 /*
+ */
+func showCommandHandler(session *Session, command Command) {
+	/* SHOW DB
+	 * SHOW DATABASES
+	 * SHOW STRAT
+	 * SHOW STRATEGIES
+	 * SHOW INFO database
+	 * SHOW SERVER */
+
+	if len(command.Params) < 1 {
+		syntaxErrorHandler(session, command)
+		return
+	}
+
+	param := strings.ToUpper(command.Params[0])
+
+	switch param {
+	case "DB", "DATABASES":
+		session.Connection.Writer.PrintfLine(
+			"110 %d database(s) present",
+			len(session.DictServer.databases),
+		)
+
+		for db := range session.DictServer.databases {
+			databaseBackend := session.DictServer.GetDatabase(db)
+			session.Connection.Writer.PrintfLine(
+				"%s \"%s\"",
+				db,
+				databaseBackend.Description(),
+			)
+		}
+
+		session.Connection.Writer.PrintfLine(".")
+		WriteCode(session, 250, "ok")
+		return
+	case "STRAT", "STRATEGIES":
+		return
+	case "INFO":
+		if len(command.Params) < 2 {
+			syntaxErrorHandler(session, command)
+			return
+		}
+		return
+	case "SERVER":
+		return
+	}
+
+	unknownCommandHandler(session, command)
+
+}
+
+/*
  *
  */
 func optionCommandHandler(session *Session, command Command) {
@@ -88,6 +140,23 @@ func syntaxErrorHandler(session *Session, command Command) {
 
 /*
  */
+func writeDefinition(
+	session *Session,
+	databaseBackend Database,
+	definition *Definition,
+	database string,
+) {
+	session.Connection.Writer.PrintfLine(
+		"151 \"%s\" %s \"%s\"",
+		definition.Word,
+		database,
+		databaseBackend.Description(),
+	)
+	WriteTextBlock(session, definition.Definition)
+}
+
+/*
+ */
 func defineCommandHandler(session *Session, command Command) {
 
 	if len(command.Params) <= 1 {
@@ -115,13 +184,7 @@ func defineCommandHandler(session *Session, command Command) {
 	)
 
 	for _, el := range words {
-		session.Connection.Writer.PrintfLine(
-			"151 \"%s\" %s \"%s\"",
-			word,
-			database,
-			databaseBackend.Description(),
-		)
-		WriteTextBlock(session, el.Definition)
+		writeDefinition(session, databaseBackend, el, database)
 	}
 	WriteCode(session, 250, "ok")
 }
@@ -133,4 +196,5 @@ func registerDefaultHandlers(server *Server) {
 	server.RegisterHandler("CLIENT", clientCommandHandler)
 	server.RegisterHandler("DEFINE", defineCommandHandler)
 	server.RegisterHandler("OPTION", optionCommandHandler)
+	server.RegisterHandler("SHOW", showCommandHandler)
 }
