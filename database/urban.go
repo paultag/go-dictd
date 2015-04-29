@@ -28,6 +28,7 @@ func (this *UrbanDictionaryDatabase) Define(name string, query string) (definiti
 	response, err := api.DefineWord(query)
 	if err != nil {
 		log.Printf("Error getting from UD: %s", err)
+		return
 	}
 
 	for _, el := range response.Results {
