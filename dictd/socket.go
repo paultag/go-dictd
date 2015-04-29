@@ -88,8 +88,9 @@ func cleanup(el string) string {
 func tokenizeLine(line string) (tokens []string, err error) {
 	var token string
 	for line != "" {
-		if line[0] == '"' {
-			token, line, err = consumeString("\"", line[1:])
+		leader := line[0]
+		if leader == '"' || leader == '\'' {
+			token, line, err = consumeString(string(leader), line[1:])
 		} else {
 			token, line, err = consumeAtom(line)
 		}
@@ -184,6 +185,12 @@ func Handle(server *Server, conn net.Conn) {
 			/* Usually an EOF */
 			return
 		}
+
+		line = strings.Trim(line, " \n\r\t")
+		if line == "" {
+			continue
+		}
+
 		command, err := parseLine(line)
 		if err != nil {
 			log.Printf("Error: %s", err)
