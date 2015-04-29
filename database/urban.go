@@ -46,12 +46,12 @@ func (this *UrbanDictionaryDatabase) Define(name string, query string) (definiti
  *
  */
 func (this *UrbanDictionaryDatabase) Info(name string) string {
-	return "Foo"
+	return "Look up words on http://www.urbandictionary.com/"
 }
 
 /*
  *
  */
 func (this *UrbanDictionaryDatabase) Description(name string) string {
-	return "UD"
+	return "Urban Dictonary"
 }
