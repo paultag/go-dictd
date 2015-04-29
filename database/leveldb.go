@@ -1,6 +1,8 @@
 package database
 
 import (
+	"strings"
+
 	"github.com/paultag/go-dictd/dictd"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
@@ -37,18 +39,17 @@ type LevelDBDatabase struct {
  *
  */
 func (this *LevelDBDatabase) Match(name string, query string, strat string) []*dictd.Definition {
+	query = strings.ToLower(query)
 	iter := this.db.NewIterator(util.BytesPrefix([]byte(query)), nil)
 	els := make([]*dictd.Definition, 0)
 
 	for iter.Next() {
 		word := string(iter.Key())
-		define := string(iter.Value())
 
 		def := &dictd.Definition{
 			DictDatabase:     this,
 			DictDatabaseName: name,
 			Word:             word,
-			Definition:       define,
 		}
 		els = append(els, def)
 	}
@@ -61,6 +62,7 @@ func (this *LevelDBDatabase) Match(name string, query string, strat string) []*d
  *
  */
 func (this *LevelDBDatabase) Define(name string, query string) []*dictd.Definition {
+	query = strings.ToLower(query)
 	data, err := this.db.Get([]byte(query), nil)
 	if err != nil {
 		/* If we don't have the key, let's bail out. */

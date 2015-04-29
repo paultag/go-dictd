@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/paultag/go-dictd/format"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -26,7 +27,8 @@ func main() {
 	defer db.Close()
 
 	for _, def := range defs {
-		db.Put([]byte(def.Word), []byte(def.Definition), nil)
+		word := strings.ToLower(def.Word)
+		db.Put([]byte(word), []byte(def.Definition), nil)
 	}
 
 }
