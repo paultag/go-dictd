@@ -206,7 +206,7 @@ func matchCommandHandler(session *Session, command Command) {
 		return
 	}
 
-	session.Connection.Writer.PrintfLine("150 %d matches found", len(defs))
+	session.Connection.Writer.PrintfLine("152 %d matches found", len(defs))
 	for _, el := range defs {
 		session.Connection.Writer.PrintfLine(
 			"%s \"%s\"",
