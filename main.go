@@ -18,7 +18,7 @@ func main() {
 
 	server.RegisterDatabase(levelDB, "jargon")
 
-	link, err := net.Listen("tcp", ":2017")
+	link, err := net.Listen("tcp", ":2628")
 	if err != nil {
 		log.Fatal(err)
 	}
