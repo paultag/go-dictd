@@ -10,13 +10,10 @@ import (
 
 func main() {
 	server := dictd.NewServer("pault.ag")
-	levelDB, err := database.NewLevelDBDatabase("/home/tag/jargon.ldb", "jargon file")
+	// levelDB, err := database.NewLevelDBDatabase("/home/tag/jargon.ldb", "jargon file")
+	urbanDB := database.UrbanDictionaryDatabase{}
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	server.RegisterDatabase(levelDB, "jargon")
+	server.RegisterDatabase(&urbanDB, "urban")
 
 	link, err := net.Listen("tcp", ":2628")
 	if err != nil {
