@@ -14,7 +14,7 @@ import (
 /*
  *
  */
-func NewLevelDBDatabase(path string, description string) (dictd.Database, error) {
+func NewLevelDBDatabase(path string, description string) (*LevelDBDatabase, error) {
 	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
 		return nil, err
@@ -99,6 +99,20 @@ func (this *LevelDBDatabase) Description(name string) string {
 }
 
 /*
+ * DB Specific calls below
+ */
+
+func (this *LevelDBDatabase) WriteDefinition(word string, definition string) {
+	/* Right, now let's build up indexes on the word
+	 *
+	 * Critically, RFC2229 forbids commands to have newlines in them, even
+	 * escaped. So, we'll use newlines to write out a prefix. This lets us
+	 * work all sorts of magic on the keys and "namespace" them. */
+
+	this.db.Put([]byte("\n"+word), []byte(definition), nil)
+}
+
+/*
  *
  *     MATCHERS
  *
@@ -110,9 +124,9 @@ func (this *LevelDBDatabase) Description(name string) string {
 /*
  */
 func (this *LevelDBDatabase) scanLevenshtein(query string, threshold int) (ret []string) {
-	iter := this.db.NewIterator(nil, nil)
+	iter := this.db.NewIterator(util.BytesPrefix([]byte("\n")), nil)
 	for iter.Next() {
-		key := string(iter.Key())
+		key := string(iter.Key())[1:]
 		distance := jellyfish.Levenshtein(query, key)
 		if distance <= threshold {
 			/* XXX: Return ordered by distance? */
@@ -126,10 +140,12 @@ func (this *LevelDBDatabase) scanLevenshtein(query string, threshold int) (ret [
 /*
  */
 func (this *LevelDBDatabase) scanPrefix(query string) (ret []string) {
+	query = "\n" + query /* See namespacing code */
+
 	iter := this.db.NewIterator(util.BytesPrefix([]byte(query)), nil)
 
 	for iter.Next() {
-		word := string(iter.Key())
+		word := string(iter.Key())[1:]
 		ret = append(ret, word)
 	}
 	iter.Release()
