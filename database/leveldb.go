@@ -48,6 +48,8 @@ func (this *LevelDBDatabase) Match(name string, query string, strat string) (def
 	switch strat {
 	case "prefix":
 		results = this.scanPrefix(query)
+	case "soundex":
+		results = this.matchSoundex(query)
 	case "levenshtein":
 		results = this.scanLevenshtein(query, 1)
 	}
@@ -182,4 +184,15 @@ func (this *LevelDBDatabase) scanPrefix(query string) (ret []string) {
 	}
 	iter.Release()
 	return
+}
+
+/*
+ */
+func (this *LevelDBDatabase) matchSoundex(query string) (ret []string) {
+	query = "soundex\n" + jellyfish.Soundex(query) /* See namespacing code */
+	data, err := this.db.Get([]byte(query), nil)
+	if err != nil {
+		return []string{}
+	}
+	return strings.Split(string(data), "\n")
 }
