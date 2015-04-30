@@ -78,9 +78,9 @@ func showCommandHandler(session *Session, command Command) {
 	case "DB", "DATABASES":
 		session.Connection.Writer.PrintfLine(
 			"110 %d database(s) present",
-			len(session.DictServer.databases),
+			len(session.DictServer.allDatabases),
 		)
-		for db := range session.DictServer.databases {
+		for _, db := range session.DictServer.allDatabases {
 			databaseBackend := session.DictServer.GetDatabase(db)
 			session.Connection.Writer.PrintfLine(
 				"%s \"%s\"",

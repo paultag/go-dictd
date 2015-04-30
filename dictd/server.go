@@ -65,10 +65,12 @@ type Database interface {
  * This contains a bundle of useful helpers, as well as a few data structures
  * to handle registered Databases and Commands. */
 type Server struct {
-	Name      string
-	Info      string
-	databases map[string]Database
-	commands  map[string]func(*Session, Command)
+	Name          string
+	Info          string
+	databases     map[string]Database
+	databaseOrder []string
+	allDatabases  []string
+	commands      map[string]func(*Session, Command)
 }
 
 /* Define a word against the server, according to fun rules! */
@@ -87,7 +89,9 @@ func (this *Server) Match(
 		/* The RFC states that we search all Databases for entries, and
 		 * if we hit, we should return all Definitions for the given word
 		 * for that Database. */
-		for database, databaseBackend := range this.databases {
+		for _, database := range this.databaseOrder {
+			databaseBackend := this.databases[database]
+
 			defs := databaseBackend.Match(database, query, strat)
 			if defs != nil && len(defs) != 0 {
 				return defs, nil
@@ -99,7 +103,8 @@ func (this *Server) Match(
 		/* The RFC states that we search all Databases for entries, and
 		 * return *all* Definitions for the given word for all Databases. */
 		var allDefs = make([]*Definition, 0)
-		for database, databaseBackend := range this.databases {
+		for _, database := range this.databaseOrder {
+			databaseBackend := this.databases[database]
 			defs := databaseBackend.Match(database, query, strat)
 			allDefs = append(allDefs, defs...)
 		}
@@ -131,7 +136,8 @@ func (this *Server) Define(
 		/* The RFC states that we search all Databases for entries, and
 		 * if we hit, we should return all Definitions for the given word
 		 * for that Database. */
-		for database, databaseBackend := range this.databases {
+		for _, database := range this.databaseOrder {
+			databaseBackend := this.databases[database]
 			defs := databaseBackend.Define(database, query)
 			if defs != nil && len(defs) != 0 {
 				return defs, nil
@@ -143,7 +149,8 @@ func (this *Server) Define(
 		/* The RFC states that we search all Databases for entries, and
 		 * return *all* Definitions for the given word for all Databases. */
 		var allDefs = make([]*Definition, 0)
-		for database, databaseBackend := range this.databases {
+		for _, database := range this.databaseOrder {
+			databaseBackend := this.databases[database]
 			defs := databaseBackend.Define(database, query)
 			allDefs = append(allDefs, defs...)
 		}
@@ -160,8 +167,13 @@ func (this *Server) Define(
 }
 
 /* Register dict.Database `database` under `name`. */
-func (this *Server) RegisterDatabase(database Database, name string) {
+func (this *Server) RegisterDatabase(database Database, name string, all bool) {
 	this.databases[name] = database
+	this.allDatabases = append(this.allDatabases, name)
+
+	if all {
+		this.databaseOrder = append(this.databaseOrder, name)
+	}
 }
 
 /* Get dict.Database that has been registered under `name`. */
@@ -193,10 +205,12 @@ func (this *Server) GetHandler(command *Command) func(*Session, Command) {
 /* Create a new server by name `name`. */
 func NewServer(name string) Server {
 	server := Server{
-		Name:      name,
-		Info:      "",
-		commands:  map[string]func(*Session, Command){},
-		databases: map[string]Database{},
+		Name:          name,
+		Info:          "",
+		commands:      map[string]func(*Session, Command){},
+		databases:     map[string]Database{},
+		databaseOrder: []string{},
+		allDatabases:  []string{},
 	}
 	registerDefaultHandlers(&server)
 	return server

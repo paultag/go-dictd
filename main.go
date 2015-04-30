@@ -56,8 +56,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		server.RegisterDatabase(db, dbConfig.Name)
+		server.RegisterDatabase(db, dbConfig.Name, true)
 	}
+
+	server.RegisterDatabase(&database.UrbanDictionaryDatabase{}, "urban", false)
 
 	link, err := net.Listen("tcp", ":2628")
 	if err != nil {
