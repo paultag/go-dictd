@@ -18,6 +18,10 @@ func main() {
 		"/home/tag/congress.ldb",
 		"congress words",
 	)
+	debian, err := database.NewLevelDBDatabase(
+		"/home/tag/debian.ldb",
+		"debian words",
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,6 +30,7 @@ func main() {
 
 	server.RegisterDatabase(jargon, "jargon")
 	server.RegisterDatabase(congress, "congress")
+	server.RegisterDatabase(debian, "debian")
 	server.RegisterDatabase(&urbanDB, "urban")
 
 	link, err := net.Listen("tcp", ":2628")

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -28,6 +29,7 @@ func main() {
 
 	for _, def := range defs {
 		word := strings.ToLower(def.Word)
+		fmt.Printf("%s\n", word)
 		db.Put([]byte(word), []byte(def.Definition), nil)
 	}
 
