@@ -4,8 +4,11 @@ import (
 	"strings"
 
 	"github.com/paultag/go-dictd/dictd"
+
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
+
+	"github.com/jamesturk/go-jellyfish"
 )
 
 /*
@@ -38,24 +41,27 @@ type LevelDBDatabase struct {
 /*
  *
  */
-func (this *LevelDBDatabase) Match(name string, query string, strat string) []*dictd.Definition {
+func (this *LevelDBDatabase) Match(name string, query string, strat string) (defs []*dictd.Definition) {
 	query = strings.ToLower(query)
-	iter := this.db.NewIterator(util.BytesPrefix([]byte(query)), nil)
-	els := make([]*dictd.Definition, 0)
+	var results []string
 
-	for iter.Next() {
-		word := string(iter.Key())
+	switch strat {
+	case "prefix":
+		results = this.scanPrefix(query)
+	case "levenshtein":
+		results = this.scanLevenshtein(query, 1)
+	}
 
+	for _, el := range results {
 		def := &dictd.Definition{
 			DictDatabase:     this,
 			DictDatabaseName: name,
-			Word:             word,
+			Word:             el,
 		}
-		els = append(els, def)
+		defs = append(defs, def)
 	}
-	iter.Release()
 
-	return els
+	return
 }
 
 /*
@@ -90,4 +96,42 @@ func (this *LevelDBDatabase) Info(name string) string {
  */
 func (this *LevelDBDatabase) Description(name string) string {
 	return this.description
+}
+
+/*
+ *
+ *     MATCHERS
+ *
+ *
+ *
+ *
+ */
+
+/*
+ */
+func (this *LevelDBDatabase) scanLevenshtein(query string, threshold int) (ret []string) {
+	iter := this.db.NewIterator(nil, nil)
+	for iter.Next() {
+		key := string(iter.Key())
+		distance := jellyfish.Levenshtein(query, key)
+		if distance <= threshold {
+			/* XXX: Return ordered by distance? */
+			ret = append(ret, key)
+		}
+	}
+	iter.Release()
+	return
+}
+
+/*
+ */
+func (this *LevelDBDatabase) scanPrefix(query string) (ret []string) {
+	iter := this.db.NewIterator(util.BytesPrefix([]byte(query)), nil)
+
+	for iter.Next() {
+		word := string(iter.Key())
+		ret = append(ret, word)
+	}
+	iter.Release()
+	return
 }
