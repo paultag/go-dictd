@@ -41,7 +41,7 @@ func loadDatabases(path string) (config *Configuration, err error) {
 }
 
 func main() {
-	config, err := loadDatabases("/etc/dictd.json")
+	config, err := loadDatabases("config.json")
 	if err != nil {
 		log.Fatal(err)
 	}
