@@ -69,7 +69,7 @@ func (this *LevelDBDatabase) Match(name string, query string, strat string) (def
  */
 func (this *LevelDBDatabase) Define(name string, query string) []*dictd.Definition {
 	query = strings.ToLower(query)
-	data, err := this.db.Get([]byte(query), nil)
+	data, err := this.db.Get([]byte("\n"+query), nil)
 	if err != nil {
 		/* If we don't have the key, let's bail out. */
 		return make([]*dictd.Definition, 0)
@@ -102,6 +102,35 @@ func (this *LevelDBDatabase) Description(name string) string {
  * DB Specific calls below
  */
 
+func (this *LevelDBDatabase) writeIndex(namespace string, key string, word string) {
+	var values []string
+
+	data, err := this.db.Get([]byte(namespace+"\n"+key), nil)
+
+	if err != nil {
+		values = []string{}
+	} else {
+		/* Values are newline delimed */
+		values = strings.Split(string(data), "\n")
+	}
+
+	for _, el := range values {
+		if el == word {
+			return
+		}
+	}
+
+	values = append(values, word)
+
+	this.db.Put(
+		[]byte(namespace+"\n"+key),
+		[]byte(strings.Join(values, "\n")),
+		nil,
+	)
+
+	/* Right, so key's not in the list. */
+}
+
 func (this *LevelDBDatabase) WriteDefinition(word string, definition string) {
 	/* Right, now let's build up indexes on the word
 	 *
@@ -110,6 +139,9 @@ func (this *LevelDBDatabase) WriteDefinition(word string, definition string) {
 	 * work all sorts of magic on the keys and "namespace" them. */
 
 	this.db.Put([]byte("\n"+word), []byte(definition), nil)
+
+	/* Right, now let's build up some indexes */
+	this.writeIndex("soundex", jellyfish.Soundex(word), word)
 }
 
 /*
