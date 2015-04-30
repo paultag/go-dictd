@@ -46,6 +46,8 @@ func (this *LevelDBDatabase) Match(name string, query string, strat string) (def
 	var results []string
 
 	switch strat {
+	case "metaphone", ".":
+		results = this.matchMetaphone(query)
 	case "prefix":
 		results = this.scanPrefix(query)
 	case "soundex":
@@ -71,7 +73,7 @@ func (this *LevelDBDatabase) Match(name string, query string, strat string) (def
  */
 func (this *LevelDBDatabase) Define(name string, query string) []*dictd.Definition {
 	query = strings.ToLower(query)
-	data, err := this.db.Get([]byte("\n"+query), nil)
+	data, err := this.get("", query)
 	if err != nil {
 		/* If we don't have the key, let's bail out. */
 		return make([]*dictd.Definition, 0)
@@ -104,10 +106,26 @@ func (this *LevelDBDatabase) Description(name string) string {
  * DB Specific calls below
  */
 
+/*
+ */
+func (this *LevelDBDatabase) write(namespace string, key string, value string) {
+	query := namespace + "\n" + key
+	this.db.Put([]byte(query), []byte(value), nil)
+}
+
+/*
+ */
+func (this *LevelDBDatabase) get(namespace string, key string) (value string, err error) {
+	data, err := this.db.Get([]byte(namespace+"\n"+key), nil)
+	return string(data), err
+}
+
+/*
+ */
 func (this *LevelDBDatabase) writeIndex(namespace string, key string, word string) {
 	var values []string
 
-	data, err := this.db.Get([]byte(namespace+"\n"+key), nil)
+	data, err := this.get(namespace, key)
 
 	if err != nil {
 		values = []string{}
@@ -123,27 +141,25 @@ func (this *LevelDBDatabase) writeIndex(namespace string, key string, word strin
 	}
 
 	values = append(values, word)
-
-	this.db.Put(
-		[]byte(namespace+"\n"+key),
-		[]byte(strings.Join(values, "\n")),
-		nil,
-	)
-
-	/* Right, so key's not in the list. */
+	this.write(namespace, key, strings.Join(values, "\n"))
 }
 
 func (this *LevelDBDatabase) WriteDefinition(word string, definition string) {
-	/* Right, now let's build up indexes on the word
-	 *
-	 * Critically, RFC2229 forbids commands to have newlines in them, even
-	 * escaped. So, we'll use newlines to write out a prefix. This lets us
-	 * work all sorts of magic on the keys and "namespace" them. */
+	/* Right, now let's build up indexes on the word */
 
-	this.db.Put([]byte("\n"+word), []byte(definition), nil)
+	this.write("", word, definition) /* no namespace for words */
 
 	/* Right, now let's build up some indexes */
 	this.writeIndex("soundex", jellyfish.Soundex(word), word)
+
+	if len(word) > 2 { /* Fixme? */
+		metaWords := jellyfish.Metaphone(word)
+
+		/* FO BA BAR BAZ */
+		for _, el := range strings.Split(metaWords, " ") {
+			this.writeIndex("metaphone", el, word)
+		}
+	}
 }
 
 /*
@@ -188,11 +204,37 @@ func (this *LevelDBDatabase) scanPrefix(query string) (ret []string) {
 
 /*
  */
-func (this *LevelDBDatabase) matchSoundex(query string) (ret []string) {
-	query = "soundex\n" + jellyfish.Soundex(query) /* See namespacing code */
-	data, err := this.db.Get([]byte(query), nil)
+func (this *LevelDBDatabase) matchFromIndex(namespace string, key string) (ret []string) {
+	data, err := this.get(namespace, key)
 	if err != nil {
 		return []string{}
 	}
 	return strings.Split(string(data), "\n")
+}
+
+/*
+ */
+func (this *LevelDBDatabase) matchSoundex(query string) (ret []string) {
+	return this.matchFromIndex("soundex", jellyfish.Soundex(query))
+}
+
+/*
+ */
+func (this *LevelDBDatabase) matchMetaphone(query string) (ret []string) {
+	meta := jellyfish.Metaphone(query)
+	for _, el := range strings.Split(meta, " ") {
+		ret = append(ret, this.matchFromIndex("metaphone", el)...)
+	}
+
+	/* right, so ret may have multiples */
+	ordering := map[string]int{}
+	for _, el := range ret {
+		ordering[el] = 0 /* update this to count / sort */
+	}
+
+	r := []string{}
+	for k, _ := range ordering {
+		r = append(ret, k)
+	}
+	return r
 }
