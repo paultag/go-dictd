@@ -1,0 +1,12 @@
+{
+    "Name": "pault.ag",
+    "Info": "Paul Tagliamonte's dictd server",
+    "Databases": [
+        {"Name": "jargon",
+         "Path": "/home/tag/jargon.ldb",
+         "Desc": "The Jargon File"},
+        {"Name": "congress",
+         "Path": "/home/tag/congress.ldb",
+         "Desc": "United States Congress Glossery"}
+    ]
+}
