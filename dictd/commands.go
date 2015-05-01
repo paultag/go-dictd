@@ -92,9 +92,14 @@ func showCommandHandler(session *Session, command Command) {
 		WriteCode(session, 250, "ok")
 		return
 	case "STRAT", "STRATEGIES":
-		session.Connection.Writer.PrintfLine("111 2 present")
-		WriteTextBlock(session, `exact "Match"
-prefix "Prefix"`)
+		session.Connection.Writer.PrintfLine(
+			"111 %d present",
+			len(session.DictServer.strats),
+		)
+		for name, descr := range session.DictServer.strats {
+			session.Connection.Writer.PrintfLine(`%s "%s"`, name, descr)
+		}
+		session.Connection.Writer.PrintfLine(".")
 		session.Connection.Writer.PrintfLine("250 ok")
 		return
 	case "INFO":

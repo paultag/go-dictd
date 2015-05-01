@@ -68,6 +68,7 @@ type Server struct {
 	Name          string
 	Info          string
 	databases     map[string]Database
+	strats        map[string]string
 	databaseOrder []string
 	allDatabases  []string
 	commands      map[string]func(*Session, Command)
@@ -211,6 +212,11 @@ func NewServer(name string) Server {
 		databases:     map[string]Database{},
 		databaseOrder: []string{},
 		allDatabases:  []string{},
+
+		strats: map[string]string{
+			"prefix": "Match based on the word's prefix",
+			"match":  "Do an exact match",
+		},
 	}
 	registerDefaultHandlers(&server)
 	return server
