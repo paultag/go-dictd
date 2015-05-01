@@ -58,6 +58,9 @@ type Database interface {
 
 	/* Method to return a one-line Description of the Database. */
 	Description(name string) string
+
+	/* Get a list of valid Match Strategies. */
+	Strategies(name string) map[string]string
 }
 
 /* Server encapsulation.
@@ -171,6 +174,11 @@ func (this *Server) Define(
 func (this *Server) RegisterDatabase(database Database, name string, all bool) {
 	this.databases[name] = database
 	this.allDatabases = append(this.allDatabases, name)
+
+	strats := database.Strategies(name)
+	for k, v := range strats {
+		this.strats[k] = v
+	}
 
 	if all {
 		this.databaseOrder = append(this.databaseOrder, name)

@@ -134,6 +134,15 @@ func (this *LevelDBDatabase) Define(name string, query string) []*dictd.Definiti
 	return els
 }
 
+/* Get all valid Strategies */
+func (this *LevelDBDatabase) Strategies(name string) map[string]string {
+	return map[string]string{
+		"levenshtein": "Levenshtein distance",
+		"soundex":     "Soundex matches",
+		"metaphone":   "Metaphone matches",
+	}
+}
+
 /* Handle the information call (SHOW INFO `name`) for this database. */
 func (this *LevelDBDatabase) Info(name string) string {
 	return "Foo"

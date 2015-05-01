@@ -56,3 +56,10 @@ func (this *UrbanDictionaryDatabase) Info(name string) string {
 func (this *UrbanDictionaryDatabase) Description(name string) string {
 	return "Urban Dictonary"
 }
+
+/*
+ *
+ */
+func (this *UrbanDictionaryDatabase) Strategies(name string) map[string]string {
+	return map[string]string{}
+}
