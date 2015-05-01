@@ -22,16 +22,19 @@ which looks something like:
 /* Database is an interface for external Database "Backends" to implement. */
 type Database interface {
 
-    /* Method to handle incoming `MATCH` commands. */
-    Match(name string, query string, strat string) []*Definition
+	/* Method to handle incoming `MATCH` commands. */
+	Match(name string, query string, strat string) []*Definition
 
-    /* Method to handle incoming `DEFINE` commands. */
-    Define(name string, query string) []*Definition
+	/* Method to handle incoming `DEFINE` commands. */
+	Define(name string, query string) []*Definition
 
-    /* Method to handle incoming `SHOW INFO` commands. */
-    Info(name string) string
+	/* Method to handle incoming `SHOW INFO` commands. */
+	Info(name string) string
 
-    /* Method to return a one-line Description of the Database. */
-    Description(name string) string
+	/* Method to return a one-line Description of the Database. */
+	Description(name string) string
+
+	/* Get a list of valid Match Strategies. */
+	Strategies(name string) map[string]string
 }
 ```
