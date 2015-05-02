@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+export DH_GOPKG := github.com/paultag/go-dictd
+export DH_GOLANG_INSTALL_ALL := 1
+export GOPATH := $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
+
+
+%:
+	dh $@ --buildsystem=golang --with=golang,systemd
+
+
+override_dh_auto_build:
+	go get -d .
+	dh_auto_build
+
+
+override_dh_auto_install:
+	dh_auto_install
+	mv debian/go-dictd/usr/bin/utils \
+		debian/go-dictd/usr/bin/go-dictd-load
+	rm -rf debian/go-dictd/usr/share/gocode
+	mkdir -p debian/go-dictd/var/lib/go-dictd/

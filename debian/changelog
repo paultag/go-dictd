@@ -1,0 +1,6 @@
+go-dictd (1.0) unstable; urgency=medium
+
+  [ Tianon Gravi ]
+  * Initial release.
+
+ -- Paul Tagliamonte <paultag@debian.org>  Fri, 01 May 2015 13:47:08 -0400

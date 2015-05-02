@@ -1,0 +1,20 @@
+Source: go-dictd
+Section: database
+Priority: optional
+Maintainer: Paul Tagliamonte <paultag@gmail.com>
+Build-Depends:
+ debhelper (>= 9),
+ dh-golang,
+ golang-go,
+ dh-systemd
+Standards-Version: 3.9.6
+
+Package: go-dictd
+Architecture: linux-any
+Depends: ${misc:Depends}, ${shlibs:Depends}, adduser
+Built-Using: ${misc:Built-Using}
+Description: something alksjflak sfjla ksjfalksjf lkajsflkj
+ goes
+ here
+ .
+ and here

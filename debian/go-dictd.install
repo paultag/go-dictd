@@ -1,0 +1,2 @@
+debian/config.json      /var/lib/go-dictd/
+debian/go-dictd-import  /usr/sbin/

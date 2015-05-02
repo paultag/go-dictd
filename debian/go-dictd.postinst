@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+	configure)
+		if [ -z "$2" ]; then
+            adduser \
+                --system \
+                --home /var/lib/go-dictd/ \
+                --shell=/bin/bash \
+                --no-create-home \
+                dictd
+		fi
+		;;
+	abort-*)
+		# How'd we get here??
+		exit 1
+		;;
+	*)
+		;;
+esac
+
+#DEBHELPER#

@@ -1,0 +1,5 @@
+*.debhelper.log
+*.substvars
+*.debhelper
+files
+go-dictd
