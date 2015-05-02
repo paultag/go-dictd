@@ -43,6 +43,7 @@ package database
  * an O(1) lookup on that key. Magic, mirite. */
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/paultag/go-dictd/dictd"
@@ -100,6 +101,8 @@ func (this *LevelDBDatabase) Match(name string, query string, strat string) (def
 		results = this.scanPrefix(query)
 	case "soundex":
 		results = this.matchSoundex(query)
+	case "anagram":
+		results = this.matchAnagram(query)
 	case "levenshtein":
 		results = this.scanLevenshtein(query, 1)
 	}
@@ -140,6 +143,7 @@ func (this *LevelDBDatabase) Strategies(name string) map[string]string {
 		"levenshtein": "Levenshtein distance",
 		"soundex":     "Soundex matches",
 		"metaphone":   "Metaphone matches",
+		"anagram":     "Anagram matches",
 	}
 }
 
@@ -201,6 +205,15 @@ func (this *LevelDBDatabase) writeIndex(namespace string, key string, word strin
 }
 
 /*
+ *
+ */
+func sortString(word string) string {
+	sorted := strings.Split(word, "")
+	sort.Strings(sorted)
+	return strings.Join(sorted, "")
+}
+
+/*
  * Given a word `word`, defined by definition `definition`, write this out
  * to the LevelDB database, and generate all Indexes we need.
  *
@@ -209,6 +222,9 @@ func (this *LevelDBDatabase) WriteDefinition(word string, definition string) {
 	/* Right, now let's build up indexes on the word */
 
 	this.write("", word, definition) /* no namespace for words */
+
+	/* Hilarious. */
+	this.writeIndex("anagram", sortString(word), word)
 
 	/* Right, now let's build up some indexes */
 	this.writeIndex("soundex", jellyfish.Soundex(word), word)
@@ -221,6 +237,7 @@ func (this *LevelDBDatabase) WriteDefinition(word string, definition string) {
 			this.writeIndex("metaphone", el, word)
 		}
 	}
+
 }
 
 /*  MATCHERS  */
@@ -267,6 +284,11 @@ func (this *LevelDBDatabase) matchFromIndex(namespace string, key string) (ret [
 		return []string{}
 	}
 	return strings.Split(string(data), "\n")
+}
+
+/* Internal anagram matcher. */
+func (this *LevelDBDatabase) matchAnagram(query string) (ret []string) {
+	return this.matchFromIndex("anagram", sortString(query))
 }
 
 /* Internal soundex matcher. */
