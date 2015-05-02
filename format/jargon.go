@@ -37,9 +37,7 @@ func ParseJargonFormat(path string) []*dictd.Definition {
 				continue
 			}
 		}
-		if def != "" {
-			def = def + "\r\n" + line
-		}
+		def = def + "\r\n" + line
 	}
 
 	defs = append(defs, &dictd.Definition{
