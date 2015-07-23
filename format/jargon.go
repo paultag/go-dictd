@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/paultag/go-dictd/dictd"
+	"pault.ag/go/dictd/dictd"
 )
 
 func ParseJargonFormat(path string) []*dictd.Definition {

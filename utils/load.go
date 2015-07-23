@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/paultag/go-dictd/database"
-	"github.com/paultag/go-dictd/format"
+	"pault.ag/go/dictd/database"
+	"pault.ag/go/dictd/format"
 )
 
 func main() {

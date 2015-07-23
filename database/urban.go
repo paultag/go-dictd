@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/jfrazelle/udict/api"
-	"github.com/paultag/go-dictd/dictd"
+	"pault.ag/go/dictd/dictd"
 )
 
 /*

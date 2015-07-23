@@ -46,7 +46,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/paultag/go-dictd/dictd"
+	"pault.ag/go/dictd/dictd"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
