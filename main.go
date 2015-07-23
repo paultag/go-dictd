@@ -6,8 +6,8 @@ import (
 	"net"
 	"os"
 
-	"github.com/paultag/go-dictd/database"
-	"github.com/paultag/go-dictd/dictd"
+	"pault.ag/go/dictd/database"
+	"pault.ag/go/dictd/dictd"
 )
 
 /* Used for the JSON file that we can load off of */
