@@ -25,7 +25,7 @@ func (this *UrbanDictionaryDatabase) Match(name string, query string, strat stri
  *
  */
 func (this *UrbanDictionaryDatabase) Define(name string, query string) (definitions []*dictd.Definition) {
-	response, err := api.DefineWord(query)
+	response, err := api.Define(query)
 	if err != nil {
 		log.Printf("Error getting from UD: %s", err)
 		return
