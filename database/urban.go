@@ -3,7 +3,7 @@ package database
 import (
 	"log"
 
-	"github.com/jfrazelle/udict/api"
+	"github.com/jessfraz/udict/api"
 	"pault.ag/go/dictd/dictd"
 )
 
